@@ -79,4 +79,65 @@ router.post('/orders', authenticate, async (req, res) => {
   }
 });
 
+// GET user orders
+router.get('/user/orders', authenticate, async (req, res) => {
+  try {
+    const { rows } = await db.query(`
+      SELECT o.*, 
+             COALESCE(json_agg(json_build_object(
+               'item_name', m.name, 
+               'qty', oi.quantity, 
+               'restaurant_id', m.restaurant_id,
+               'restaurant_name', r.name
+             )) FILTER (WHERE m.id IS NOT NULL), '[]') as items
+      FROM orders o
+      LEFT JOIN order_items oi ON o.id = oi.order_id
+      LEFT JOIN menu_items m ON oi.menu_item_id = m.id
+      LEFT JOIN restaurants r ON m.restaurant_id = r.id
+      WHERE o.user_id = $1
+      GROUP BY o.id
+      ORDER BY o.created_at DESC
+    `, [req.user.id]);
+    res.json(rows);
+  } catch(err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST a review
+router.post('/reviews', authenticate, async (req, res) => {
+  try {
+    const { restaurant_id, rating, comment } = req.body;
+    await db.query(
+      'INSERT INTO reviews (user_id, restaurant_id, rating, comment) VALUES ($1, $2, $3, $4)',
+      [req.user.id, restaurant_id, rating, comment]
+    );
+    // Dynamic Score Recalculation
+    await db.query(
+      'UPDATE restaurants SET rating = (SELECT ROUND(AVG(rating), 1) FROM reviews WHERE restaurant_id = $1) WHERE id = $1',
+      [restaurant_id]
+    );
+    res.json({ message: 'Review submitted' });
+  } catch(err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET reviews for a restaurant
+router.get('/restaurants/:id/reviews', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { rows } = await db.query(`
+      SELECT r.id, r.rating, r.comment, r.created_at, u.name as user_name 
+      FROM reviews r
+      JOIN users u ON r.user_id = u.id
+      WHERE r.restaurant_id = $1
+      ORDER BY r.created_at DESC
+    `, [id]);
+    res.json(rows);
+  } catch(err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;

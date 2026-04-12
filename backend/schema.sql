@@ -75,3 +75,14 @@ INSERT INTO menu_items (id, restaurant_id, name, price, description, image) VALU
 
 -- Fix sequence
 SELECT setval('menu_items_id_seq', 402);
+
+-- 5. Create reviews table
+CREATE TABLE reviews (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    restaurant_id INTEGER REFERENCES restaurants(id) ON DELETE CASCADE,
+    rating INTEGER CHECK (rating >= 1 AND rating <= 5) NOT NULL,
+    comment TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+

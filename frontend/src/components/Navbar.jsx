@@ -11,6 +11,7 @@ export default function Navbar({ cartCount, authUser, handleLogout }) {
             {authUser ? (
               <div className="flex items-center gap-4">
                 <span style={{ fontWeight: '500', color: 'var(--text-muted)' }}>Hi, {authUser.name.split(' ')[0]}</span>
+                <Link to="/profile" className="btn btn-outline" style={{ padding: '0.4rem 1rem', fontSize: '0.85rem' }}>My Orders</Link>
                 {authUser.role === 'admin' && (
                   <Link to="/admin" className="btn btn-outline" style={{ padding: '0.4rem 1rem', fontSize: '0.85rem' }}>Admin Dashboard</Link>
                 )}

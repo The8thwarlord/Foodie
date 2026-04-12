@@ -6,6 +6,7 @@ import RestaurantMenu from './pages/RestaurantMenu';
 import Checkout from './pages/Checkout';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import CustomerOrders from './pages/CustomerOrders';
 import AdminLayout from './pages/admin/AdminLayout';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminOrders from './pages/admin/AdminOrders';
@@ -55,6 +56,7 @@ function App() {
           <Route path="/signup" element={<Signup setAuthUser={setAuthUser} />} />
           <Route path="/restaurant/:id" element={<RestaurantMenu addToCart={addToCart} />} />
           <Route path="/checkout" element={<Checkout cart={cart} cartTotal={cartTotal} authUser={authUser} />} />
+          <Route path="/profile" element={<CustomerOrders />} />
         </Route>
 
         {/* Admin Dashboard */}
