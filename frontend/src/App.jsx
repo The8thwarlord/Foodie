@@ -9,6 +9,7 @@ import Signup from './pages/Signup';
 import AdminLayout from './pages/admin/AdminLayout';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminOrders from './pages/admin/AdminOrders';
+import AdminLogin from './pages/admin/AdminLogin';
 
 const CustomerLayout = ({ cartCount, authUser, handleLogout }) => (
   <>
@@ -57,6 +58,7 @@ function App() {
         </Route>
 
         {/* Admin Dashboard */}
+        <Route path="/admin/login" element={<AdminLogin setAuthUser={setAuthUser} />} />
         <Route path="/admin" element={<AdminLayout authUser={authUser} handleLogout={handleLogout} />}>
           <Route index element={<AdminDashboard />} />
           <Route path="orders" element={<AdminOrders />} />

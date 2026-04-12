@@ -45,6 +45,12 @@ export default function Login({ setAuthUser }) {
       <p style={{ textAlign: 'center', marginTop: '1.5rem', color: 'var(--text-muted)' }}>
         Don't have an account? <Link to="/signup" style={{ color: 'var(--primary-color)', fontWeight: '600' }}>Sign up</Link>
       </p>
+      
+      <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border-color)', textAlign: 'center' }}>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+          Restaurant Partner? <Link to="/admin/login" style={{ color: '#1e293b', fontWeight: '700', textDecoration: 'underline' }}>Admin Login</Link>
+        </p>
+      </div>
     </div>
   );
 }
