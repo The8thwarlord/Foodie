@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
 import { useState } from 'react';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
@@ -6,6 +6,18 @@ import RestaurantMenu from './pages/RestaurantMenu';
 import Checkout from './pages/Checkout';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import AdminLayout from './pages/admin/AdminLayout';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminOrders from './pages/admin/AdminOrders';
+
+const CustomerLayout = ({ cartCount, authUser, handleLogout }) => (
+  <>
+    <Navbar cartCount={cartCount} authUser={authUser} handleLogout={handleLogout} />
+    <main className="container" style={{ padding: '2rem 1.5rem' }}>
+      <Outlet />
+    </main>
+  </>
+);
 
 function App() {
   const [cart, setCart] = useState([]);
@@ -34,20 +46,22 @@ function App() {
 
   return (
     <Router>
-      <Navbar 
-        cartCount={cart.reduce((sum, item) => sum + item.qty, 0)} 
-        authUser={authUser} 
-        handleLogout={handleLogout} 
-      />
-      <main className="container" style={{ padding: '2rem 1.5rem' }}>
-        <Routes>
+      <Routes>
+        {/* Customer Facing Site */}
+        <Route element={<CustomerLayout cartCount={cart.reduce((sum, item) => sum + item.qty, 0)} authUser={authUser} handleLogout={handleLogout} />}>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login setAuthUser={setAuthUser} />} />
           <Route path="/signup" element={<Signup setAuthUser={setAuthUser} />} />
           <Route path="/restaurant/:id" element={<RestaurantMenu addToCart={addToCart} />} />
           <Route path="/checkout" element={<Checkout cart={cart} cartTotal={cartTotal} authUser={authUser} />} />
-        </Routes>
-      </main>
+        </Route>
+
+        {/* Admin Dashboard */}
+        <Route path="/admin" element={<AdminLayout authUser={authUser} handleLogout={handleLogout} />}>
+          <Route index element={<AdminDashboard />} />
+          <Route path="orders" element={<AdminOrders />} />
+        </Route>
+      </Routes>
     </Router>
   );
 }

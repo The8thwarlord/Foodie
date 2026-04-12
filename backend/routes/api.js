@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
+const { authenticate } = require('../middleware/authMiddleware');
 
 // Add some mock data in case the database isn't hooked up yet
 const MOCK_RESTAURANTS = [
@@ -52,14 +53,14 @@ router.get('/restaurants/:id/menu', async (req, res) => {
 });
 
 // POST a new order
-router.post('/orders', async (req, res) => {
+router.post('/orders', authenticate, async (req, res) => {
   try {
     const { items, total, customerDetails } = req.body;
     
     // Insert order into DB
     const result = await db.query(
-      'INSERT INTO orders (total, customer_name, address) VALUES ($1, $2, $3) RETURNING id', 
-      [total, customerDetails.name, customerDetails.address]
+      'INSERT INTO orders (total, customer_name, address, user_id, status) VALUES ($1, $2, $3, $4, $5) RETURNING id', 
+      [total, customerDetails.name, customerDetails.address, req.user.id, 'Pending']
     );
     const orderId = result.rows[0].id;
     
