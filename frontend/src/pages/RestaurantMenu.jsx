@@ -1,0 +1,52 @@
+import { useEffect, useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { ArrowLeft, Plus } from 'lucide-react';
+
+export default function RestaurantMenu({ addToCart }) {
+  const { id } = useParams();
+  const [menuItems, setMenuItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(`http://localhost:5000/api/restaurants/${id}/menu`)
+      .then(res => res.json())
+      .then(data => {
+        setMenuItems(data);
+        setLoading(false);
+      })
+      .catch(err => console.error(err));
+  }, [id]);
+
+  if (loading) return <div style={{ textAlign: 'center', padding: '3rem' }}>Loading menu...</div>;
+
+  return (
+    <div>
+      <Link to="/" className="flex items-center gap-2" style={{ color: 'var(--text-muted)', marginBottom: '2rem', display: 'inline-flex' }}>
+        <ArrowLeft size={16} /> Back to restaurants
+      </Link>
+      
+      <h1 style={{ fontSize: '2.5rem', marginBottom: '2rem', fontWeight: 700 }}>Menu</h1>
+      
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '2rem' }}>
+        {menuItems.map(item => (
+          <div key={item.id} className="card" style={{ flexDirection: 'row', height: '140px' }}>
+            <img src={item.image} alt={item.name} style={{ width: '120px', height: '100%', objectFit: 'cover' }} />
+            <div className="card-content flex" style={{ padding: '1rem', flex: 1, flexDirection: 'column', justifyContent: 'center' }}>
+              <h3 className="title" style={{ fontSize: '1.1rem', margin: 0 }}>{item.name}</h3>
+              <p className="subtitle" style={{ fontSize: '0.85rem', marginBottom: '0.5rem', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{item.description}</p>
+              <div className="flex justify-between items-center" style={{ marginTop: 'auto' }}>
+                <span style={{ fontWeight: 600, color: 'var(--success-color)' }}>${Number(item.price).toFixed(2)}</span>
+                <button className="btn-icon" onClick={() => addToCart(item)} style={{ background: 'var(--primary-color)', color: 'white', width: '32px', height: '32px' }}>
+                  <Plus size={16} />
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+      {menuItems.length === 0 && (
+        <div style={{ textAlign: 'center', color: 'var(--text-muted)' }}>No items found for this restaurant.</div>
+      )}
+    </div>
+  );
+}

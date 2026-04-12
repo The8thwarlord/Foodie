@@ -1,0 +1,81 @@
+const express = require('express');
+const router = express.Router();
+const db = require('../db');
+
+// Add some mock data in case the database isn't hooked up yet
+const MOCK_RESTAURANTS = [
+  { id: 1, name: 'Burger Joint', rating: 4.5, image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=500&q=60', description: 'Best burgers in town' },
+  { id: 2, name: 'Pizza Paradise', rating: 4.8, image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=500&q=60', description: 'Authentic Italian pizza' },
+  { id: 3, name: 'Healthy Greens', rating: 4.2, image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=500&q=60', description: 'Fresh salads and bowls' },
+  { id: 4, name: 'Sushi Bliss', rating: 4.9, image: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=500&q=60', description: 'Premium sushi and rolls' }
+];
+
+const MOCK_MENUS = {
+  1: [
+    { id: 101, name: 'Classic Burger', price: 9.99, description: 'Beef patty with lettuce, tomato, and our secret sauce', image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=200&q=60' },
+    { id: 102, name: 'Cheeseburger', price: 10.99, description: 'Classic with melted cheddar', image: 'https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=200&q=60' },
+    { id: 103, name: 'Fries', price: 3.99, description: 'Crispy golden fries', image: 'https://images.unsplash.com/photo-1576107232684-1279f390859f?auto=format&fit=crop&w=200&q=60' },
+  ],
+  2: [
+    { id: 201, name: 'Margherita', price: 12.99, description: 'Tomato, mozzarella, and basil', image: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=200&q=60' },
+    { id: 202, name: 'Pepperoni Pizza', price: 14.99, description: 'Classic pepperoni with extra cheese', image: 'https://images.unsplash.com/photo-1628840042765-356cda07504e?auto=format&fit=crop&w=200&q=60' },
+  ],
+  3: [
+    { id: 301, name: 'Caesar Salad', price: 8.99, description: 'Crisp romaine with caesar dressing', image: 'https://images.unsplash.com/photo-1550304943-4f24f54ddde9?auto=format&fit=crop&w=200&q=60' },
+    { id: 302, name: 'Quinoa Bowl', price: 11.99, description: 'Quinoa, roasted veggies, and tahini', image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=200&q=60' },
+  ],
+  4: [
+    { id: 401, name: 'Spicy Tuna Roll', price: 8.99, description: 'Fresh tuna with spicy mayo', image: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=200&q=60' },
+    { id: 402, name: 'Salmon Nigiri', price: 6.99, description: 'Two pieces of fresh salmon on rice', image: 'https://images.unsplash.com/photo-1583623025817-d180a2221d0a?auto=format&fit=crop&w=200&q=60' },
+  ]
+};
+
+// GET all restaurants
+router.get('/restaurants', async (req, res) => {
+  try {
+    const { rows } = await db.query('SELECT * FROM restaurants ORDER BY id ASC');
+    return res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET menu for a restaurant
+router.get('/restaurants/:id/menu', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { rows } = await db.query('SELECT * FROM menu_items WHERE restaurant_id = $1 ORDER BY id ASC', [id]);
+    return res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST a new order
+router.post('/orders', async (req, res) => {
+  try {
+    const { items, total, customerDetails } = req.body;
+    
+    // Insert order into DB
+    const result = await db.query(
+      'INSERT INTO orders (total, customer_name, address) VALUES ($1, $2, $3) RETURNING id', 
+      [total, customerDetails.name, customerDetails.address]
+    );
+    const orderId = result.rows[0].id;
+    
+    // Insert order items
+    for (const item of items) {
+      await db.query(
+        'INSERT INTO order_items (order_id, menu_item_id, quantity, price_at_time) VALUES ($1, $2, $3, $4)',
+        [orderId, item.id, item.qty, item.price]
+      );
+    }
+
+    console.log(`Saved order #${orderId} to database:`, { items, total, customerDetails });
+    res.status(201).json({ message: 'Order created successfully', orderId });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+module.exports = router;
