@@ -1,18 +1,27 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-export default function Checkout({ cart, cartTotal }) {
-  const [formData, setFormData] = useState({ name: '', address: '' });
+export default function Checkout({ cart, cartTotal, authUser }) {
+  const [formData, setFormData] = useState({ name: authUser?.name || '', address: '' });
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if(cart.length === 0) return alert('Cart is empty!');
+    if(!authUser) {
+      alert('You must be logged in to place an order.');
+      navigate('/login');
+      return;
+    }
     
     try {
+      const token = localStorage.getItem('token');
       const res = await fetch('http://localhost:5000/api/orders', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` 
+        },
         body: JSON.stringify({
           items: cart,
           total: cartTotal,
