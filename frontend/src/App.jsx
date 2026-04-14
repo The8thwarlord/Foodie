@@ -15,9 +15,7 @@ import AdminLogin from './pages/admin/AdminLogin';
 const CustomerLayout = ({ cartCount, authUser, handleLogout }) => (
   <>
     <Navbar cartCount={cartCount} authUser={authUser} handleLogout={handleLogout} />
-    <main className="container" style={{ padding: '2rem 1.5rem' }}>
-      <Outlet />
-    </main>
+    <Outlet />
   </>
 );
 

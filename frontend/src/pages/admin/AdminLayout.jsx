@@ -43,7 +43,7 @@ export default function AdminLayout({ authUser, handleLogout }) {
     <div style={{ display: 'flex', minHeight: '100vh', background: '#f1f5f9' }}>
       <aside style={sidebarStyle}>
         <div style={{ fontSize: '1.5rem', fontWeight: '800', marginBottom: '3rem', color: 'white' }}>
-          Enatega<span style={{ color: 'var(--primary-color)' }}>.</span> Admin
+          Foodie<span style={{ color: 'var(--primary-color)' }}>.</span> Admin
         </div>
         
         <nav style={{ flex: 1 }}>

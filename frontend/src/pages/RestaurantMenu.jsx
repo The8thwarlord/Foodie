@@ -24,7 +24,7 @@ export default function RestaurantMenu({ addToCart }) {
   if (loading) return <div style={{ textAlign: 'center', padding: '3rem' }}>Loading restaurant...</div>;
 
   return (
-    <div>
+    <div className="container" style={{ padding: '3rem 1.5rem' }}>
       <Link to="/" className="flex items-center gap-2" style={{ color: 'var(--text-muted)', marginBottom: '2rem', display: 'inline-flex' }}>
         <ArrowLeft size={16} /> Back to restaurants
       </Link>

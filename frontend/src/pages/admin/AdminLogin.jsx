@@ -35,7 +35,7 @@ export default function AdminLogin({ setAuthUser }) {
     <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center', background: '#1e293b' }}>
       <div className="card" style={{ width: '100%', maxWidth: '400px', padding: '2.5rem', background: 'white' }}>
         <h1 style={{ fontSize: '1.75rem', fontWeight: '800', textAlign: 'center', marginBottom: '2rem', color: '#1e293b' }}>
-          Enatega<span style={{ color: 'var(--primary-color)' }}>.</span> Admin Portal
+          Foodie<span style={{ color: 'var(--primary-color)' }}>.</span> Admin Portal
         </h1>
         {error && <div style={{ color: 'var(--danger-color)', marginBottom: '1rem', textAlign: 'center', fontWeight: '500' }}>{error}</div>}
         <form onSubmit={handleLogin}>

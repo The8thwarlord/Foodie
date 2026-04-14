@@ -67,7 +67,7 @@ router.put('/orders/:id/status', async (req, res) => {
         });
         
         let info = await transporter.sendMail({
-          from: '"Enatega Deliveries" <delivery@enatega.clone>',
+          from: '"Foodie Deliveries" <delivery@foodie.app>',
           to: user.email,
           subject: `Your amazing food is Out for Delivery! 🚀`,
           html: `<h3>Hey ${user.name},</h3><p>Your order #${id} for $${user.total} is currently out for delivery and arriving soon!</p>`

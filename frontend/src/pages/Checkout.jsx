@@ -38,7 +38,8 @@ export default function Checkout({ cart, cartTotal, authUser }) {
   };
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+    <div className="container" style={{ padding: '3rem 1.5rem' }}>
+      <div style={{ maxWidth: '800px', margin: '0 auto' }}>
       <h1 style={{ fontSize: '2.5rem', marginBottom: '2rem', fontWeight: 700 }}>Checkout</h1>
       
       <div className="grid" style={{ gridTemplateColumns: 'minmax(0, 1fr) 300px', gap: '3rem', alignItems: 'start' }}>
@@ -89,6 +90,7 @@ export default function Checkout({ cart, cartTotal, authUser }) {
             </div>
           )}
         </div>
+      </div>
       </div>
     </div>
   );
