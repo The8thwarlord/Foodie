@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom
 import { useState } from 'react';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
+import HomeLoggedIn from './pages/HomeLoggedIn';
 import RestaurantMenu from './pages/RestaurantMenu';
 import Checkout from './pages/Checkout';
 import Login from './pages/Login';
@@ -49,7 +50,7 @@ function App() {
       <Routes>
         {/* Customer Facing Site */}
         <Route element={<CustomerLayout cartCount={cart.reduce((sum, item) => sum + item.qty, 0)} authUser={authUser} handleLogout={handleLogout} />}>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={authUser ? <HomeLoggedIn authUser={authUser} /> : <Home />} />
           <Route path="/login" element={<Login setAuthUser={setAuthUser} />} />
           <Route path="/signup" element={<Signup setAuthUser={setAuthUser} />} />
           <Route path="/restaurant/:id" element={<RestaurantMenu addToCart={addToCart} />} />
