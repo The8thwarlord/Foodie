@@ -99,6 +99,23 @@ router.post('/reviews', authenticate, async (req, res) => {
   }
 });
 
+// GET latest global reviews
+router.get('/reviews/latest', async (req, res) => {
+  try {
+    const { rows } = await db.query(`
+      SELECT r.id, r.rating, r.comment, r.created_at, u.name as user_name, rest.name as restaurant_name 
+      FROM reviews r
+      JOIN users u ON r.user_id = u.id
+      JOIN restaurants rest ON r.restaurant_id = rest.id
+      ORDER BY r.created_at DESC
+      LIMIT 6
+    `);
+    res.json(rows);
+  } catch(err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // GET reviews for a restaurant
 router.get('/restaurants/:id/reviews', async (req, res) => {
   try {

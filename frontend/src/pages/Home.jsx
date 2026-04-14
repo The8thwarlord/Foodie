@@ -4,14 +4,31 @@ import { Star, ChevronRight, MapPin, Clock, Shield } from 'lucide-react';
 
 export default function Home() {
   const [restaurants, setRestaurants] = useState([]);
+  const [filteredRestaurants, setFilteredRestaurants] = useState([]);
+  const [activeCategory, setActiveCategory] = useState('All');
   const [loading, setLoading] = useState(true);
+
+  const categories = ['All', 'Burgers', 'Pizza', 'Healthy', 'Asian', 'Indian', 'Mexican', 'Desserts', 'BBQ', 'Breakfast', 'Middle Eastern', 'Italian', 'Steakhouse', 'Drinks', 'Seafood', 'French'];
 
   useEffect(() => {
     fetch('http://localhost:5000/api/restaurants')
       .then(res => res.json())
-      .then(data => { setRestaurants(data); setLoading(false); })
+      .then(data => { 
+        setRestaurants(data); 
+        setFilteredRestaurants(data);
+        setLoading(false); 
+      })
       .catch(() => setLoading(false));
   }, []);
+
+  const handleFilter = (cat) => {
+    setActiveCategory(cat);
+    if (cat === 'All') {
+      setFilteredRestaurants(restaurants);
+    } else {
+      setFilteredRestaurants(restaurants.filter(r => r.category === cat));
+    }
+  };
 
   return (
     <div>
@@ -21,7 +38,7 @@ export default function Home() {
         <div className="container" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', alignItems: 'center', gap: '4rem', width: '100%', position: 'relative', zIndex: 2 }}>
           <div>
             <div className="hero-badge">
-              <span>🔥</span> Now serving 4 restaurants near you
+              <span>🔥</span> Now serving 20+ restaurants near you
             </div>
             <h1>Delicious food,<br /><span>delivered fast</span></h1>
             <p>Order from your favorite local restaurants — burgers, pizza, sushi, and more — delivered straight to your door in under 45 minutes.</p>
@@ -33,7 +50,7 @@ export default function Home() {
             </div>
             <div className="hero-stats">
               <div>
-                <div className="hero-stat-value">4+</div>
+                <div className="hero-stat-value">20+</div>
                 <div className="hero-stat-label">Restaurants</div>
               </div>
               <div style={{ width: '1px', background: 'rgba(255,255,255,0.1)' }}></div>
@@ -113,12 +130,24 @@ export default function Home() {
           <h2 className="section-title">Featured Restaurants</h2>
           <p className="section-subtitle">Handpicked restaurants delivering to you right now</p>
           
+          <div className="category-container">
+            {categories.map(cat => (
+              <button 
+                key={cat} 
+                className={`category-pill ${activeCategory === cat ? 'active' : ''}`}
+                onClick={() => handleFilter(cat)}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+
           {loading ? (
             <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>Loading restaurants...</div>
           ) : (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(290px, 1fr))', gap: '2rem' }}>
-              {restaurants.map(rest => (
-                <Link to={`/restaurant/${rest.id}`} key={rest.id}>
+              {filteredRestaurants.length > 0 ? filteredRestaurants.map((rest, idx) => (
+                <Link to={`/restaurant/${rest.id}`} key={rest.id} className="pop-card" style={{ animationDelay: `${idx * 0.05}s` }}>
                   <div className="card">
                     <div style={{ overflow: 'hidden' }}>
                       <img src={rest.image} alt={rest.name} className="card-img" />
@@ -143,7 +172,11 @@ export default function Home() {
                     </div>
                   </div>
                 </Link>
-              ))}
+              )) : (
+                <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '4rem', color: 'var(--text-muted)' }}>
+                  No restaurants found in this category yet.
+                </div>
+              )}
             </div>
           )}
         </div>

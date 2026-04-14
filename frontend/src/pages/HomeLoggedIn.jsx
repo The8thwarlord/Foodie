@@ -4,8 +4,13 @@ import { Star, Clock, MapPin, ShoppingBag, ChevronRight, TrendingUp } from 'luci
 
 export default function HomeLoggedIn({ authUser }) {
   const [restaurants, setRestaurants] = useState([]);
+  const [filteredRestaurants, setFilteredRestaurants] = useState([]);
+  const [latestReviews, setLatestReviews] = useState([]);
   const [recentOrders, setRecentOrders] = useState([]);
+  const [activeCategory, setActiveCategory] = useState('All');
   const [loading, setLoading] = useState(true);
+
+  const categories = ['All', 'Burgers', 'Pizza', 'Healthy', 'Asian', 'Indian', 'Mexican', 'Desserts', 'BBQ', 'Breakfast', 'Middle Eastern', 'Italian', 'Steakhouse', 'Drinks', 'Seafood', 'French'];
 
   const STATUS_COLORS = {
     'Pending':         { bg: '#fef3c7', color: '#d97706' },
@@ -26,11 +31,14 @@ export default function HomeLoggedIn({ authUser }) {
     const token = localStorage.getItem('token');
     Promise.all([
       fetch('http://localhost:5000/api/restaurants').then(r => r.json()),
+      fetch('http://localhost:5000/api/reviews/latest').then(r => r.json()),
       fetch('http://localhost:5000/api/user/orders', {
         headers: { Authorization: `Bearer ${token}` }
       }).then(r => r.json()),
-    ]).then(([rests, orders]) => {
+    ]).then(([rests, revs, orders]) => {
       setRestaurants(rests);
+      setFilteredRestaurants(rests);
+      setLatestReviews(revs);
       // Show only 2 most recent active orders
       const active = (Array.isArray(orders) ? orders : [])
         .filter(o => o.status !== 'Delivered' && o.status !== 'Canceled')
@@ -39,6 +47,15 @@ export default function HomeLoggedIn({ authUser }) {
       setLoading(false);
     }).catch(() => setLoading(false));
   }, []);
+
+  const handleFilter = (cat) => {
+    setActiveCategory(cat);
+    if (cat === 'All') {
+      setFilteredRestaurants(restaurants);
+    } else {
+      setFilteredRestaurants(restaurants.filter(r => r.category === cat));
+    }
+  };
 
   return (
     <div style={{ background: 'var(--bg-color)', minHeight: '100vh' }}>
@@ -138,18 +155,34 @@ export default function HomeLoggedIn({ authUser }) {
           </div>
         )}
 
+        {/* ===== CATEGORY FILTER ===== */}
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'1.25rem' }}>
+          <h2 style={{ fontSize:'1.4rem', fontWeight:800 }}>Explore Cuisines</h2>
+        </div>
+        <div className="category-container">
+          {categories.map(cat => (
+            <button 
+              key={cat} 
+              className={`category-pill ${activeCategory === cat ? 'active' : ''}`}
+              onClick={() => handleFilter(cat)}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+
         {/* ===== RESTAURANT GRID ===== */}
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'1.25rem' }}>
-          <h2 style={{ fontSize:'1.4rem', fontWeight:800 }}>Restaurants Near You</h2>
-          <span style={{ color:'var(--text-muted)', fontSize:'0.9rem' }}>{restaurants.length} available</span>
+          <h2 style={{ fontSize:'1.4rem', fontWeight:800 }}>Restaurants for you</h2>
+          <span style={{ color:'var(--text-muted)', fontSize:'0.9rem' }}>{filteredRestaurants.length} matches</span>
         </div>
 
         {loading ? (
           <div style={{ textAlign:'center', padding:'3rem', color:'var(--text-muted)' }}>Loading restaurants...</div>
         ) : (
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(290px,1fr))', gap:'1.75rem' }}>
-            {restaurants.map(rest => (
-              <Link to={`/restaurant/${rest.id}`} key={rest.id}>
+            {filteredRestaurants.length > 0 ? filteredRestaurants.map((rest, idx) => (
+              <Link to={`/restaurant/${rest.id}`} key={rest.id} className="pop-card" style={{ animationDelay: `${idx * 0.05}s` }}>
                 <div className="card">
                   <div style={{ overflow:'hidden' }}>
                     <img src={rest.image} alt={rest.name} className="card-img" />
@@ -171,7 +204,41 @@ export default function HomeLoggedIn({ authUser }) {
                   </div>
                 </div>
               </Link>
-            ))}
+            )) : (
+              <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '4rem', color: 'var(--text-muted)' }}>
+                No restaurants found in this category yet.
+              </div>
+            )}
+          </div>
+        )}
+        {/* ===== WHAT PEOPLE ARE SAYING ===== */}
+        {latestReviews.length > 0 && (
+          <div style={{ marginTop:'4rem' }}>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'1.5rem' }}>
+              <div>
+                <h2 style={{ fontSize:'1.4rem', fontWeight:800 }}>What people are saying</h2>
+                <p style={{ color:'var(--text-muted)', fontSize:'0.95rem' }}>Recent reviews from the Foodie community</p>
+              </div>
+            </div>
+            <div className="review-grid">
+              {latestReviews.map(rev => (
+                <div key={rev.id} className="review-card">
+                  <div className="review-header">
+                    <span className="review-user">{rev.user_name}</span>
+                    <div className="stars">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} size={14} fill={i < rev.rating ? "#fbbf24" : "none"} stroke={i < rev.rating ? "#fbbf24" : "#e2e8f0"} />
+                      ))}
+                    </div>
+                  </div>
+                  <p className="review-comment">"{rev.comment}"</p>
+                  <div className="review-footer">
+                    <span>on <span className="review-rest-name">{rev.restaurant_name}</span></span>
+                    <span>{new Date(rev.created_at).toLocaleDateString()}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
