@@ -52,32 +52,8 @@ router.get('/restaurants/:id/menu', async (req, res) => {
   }
 });
 
-// POST a new order
-router.post('/orders', authenticate, async (req, res) => {
-  try {
-    const { items, total, customerDetails } = req.body;
-    
-    // Insert order into DB
-    const result = await db.query(
-      'INSERT INTO orders (total, customer_name, address, user_id, status) VALUES ($1, $2, $3, $4, $5) RETURNING id', 
-      [total, customerDetails.name, customerDetails.address, req.user.id, 'Pending']
-    );
-    const orderId = result.rows[0].id;
-    
-    // Insert order items
-    for (const item of items) {
-      await db.query(
-        'INSERT INTO order_items (order_id, menu_item_id, quantity, price_at_time) VALUES ($1, $2, $3, $4)',
-        [orderId, item.id, item.qty, item.price]
-      );
-    }
-
-    console.log(`Saved order #${orderId} to database:`, { items, total, customerDetails });
-    res.status(201).json({ message: 'Order created successfully', orderId });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+// Orders are now created only after Razorpay payment verification
+// See: POST /api/payment/verify in routes/payment.js
 
 // GET user orders
 router.get('/user/orders', authenticate, async (req, res) => {

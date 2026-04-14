@@ -55,6 +55,7 @@ export default function AdminOrders() {
               <th style={{ padding: '1.25rem 1.5rem', fontWeight: '600', color: '#64748b' }}>Customer Name</th>
               <th style={{ padding: '1.25rem 1.5rem', fontWeight: '600', color: '#64748b' }}>Customer Email</th>
               <th style={{ padding: '1.25rem 1.5rem', fontWeight: '600', color: '#64748b' }}>Total</th>
+              <th style={{ padding: '1.25rem 1.5rem', fontWeight: '600', color: '#64748b' }}>Payment</th>
               <th style={{ padding: '1.25rem 1.5rem', fontWeight: '600', color: '#64748b' }}>Status</th>
               <th style={{ padding: '1.25rem 1.5rem', fontWeight: '600', color: '#64748b' }}>Action</th>
             </tr>
@@ -66,6 +67,15 @@ export default function AdminOrders() {
                 <td style={{ padding: '1.25rem 1.5rem' }}>{order.customer_name || 'Guest'}</td>
                 <td style={{ padding: '1.25rem 1.5rem', color: '#64748b' }}>{order.email || 'N/A'}</td>
                 <td style={{ padding: '1.25rem 1.5rem', fontWeight: '600' }}>${Number(order.total).toFixed(2)}</td>
+                <td style={{ padding: '1.25rem 1.5rem' }}>
+                  <span style={{
+                    padding: '0.2rem 0.65rem', borderRadius: '999px', fontSize: '0.78rem', fontWeight: '700',
+                    background: order.payment_status === 'paid' ? '#d1fae5' : '#fee2e2',
+                    color: order.payment_status === 'paid' ? '#059669' : '#dc2626'
+                  }}>
+                    {order.payment_status === 'paid' ? '✓ Paid' : 'Unpaid'}
+                  </span>
+                </td>
                 <td style={{ padding: '1.25rem 1.5rem' }}>
                   <span style={{ 
                     padding: '0.25rem 0.75rem', 

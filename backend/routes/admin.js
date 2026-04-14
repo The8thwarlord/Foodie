@@ -9,7 +9,7 @@ router.use(authenticate, isAdmin);
 // GET analytics
 router.get('/analytics', async (req, res) => {
   try {
-    const ordersResult = await db.query('SELECT COUNT(*) as total_orders, SUM(total) as revenue FROM orders');
+    const ordersResult = await db.query("SELECT COUNT(*) as total_orders, SUM(total) as revenue FROM orders WHERE payment_status = 'paid'");
     const usersResult = await db.query("SELECT COUNT(*) as total_users FROM users WHERE role = 'customer'");
     
     res.json({
@@ -26,7 +26,8 @@ router.get('/analytics', async (req, res) => {
 router.get('/orders', async (req, res) => {
   try {
     const { rows } = await db.query(`
-      SELECT o.id, o.customer_name, o.address, o.total, o.created_at, o.status, u.email 
+      SELECT o.id, o.customer_name, o.address, o.total, o.created_at, o.status, 
+             o.payment_status, o.payment_id, u.email 
       FROM orders o 
       LEFT JOIN users u ON o.user_id = u.id 
       ORDER BY o.created_at DESC
